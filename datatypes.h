@@ -38,6 +38,13 @@ typedef enum {
 } mc_state;
 
 typedef enum {
+   CRUISE_CONTROL_MOTOR_SETTINGS = 0,
+   CRUISE_CONTROL_BRAKING_DISABLED,
+   CRUISE_CONTROL_BRAKING_ENABLED,
+   CRUISE_CONTROL_INACTIVE
+} ppm_cruise;
+
+typedef enum {
 	PWM_MODE_NONSYNCHRONOUS_HISW = 0, // This mode is not recommended
 	PWM_MODE_SYNCHRONOUS, // The recommended and most tested mode
 	PWM_MODE_BIPOLAR // Some glitches occasionally, can kill MOSFETs
@@ -123,6 +130,8 @@ typedef struct {
 	float l_in_current_max;
 	float l_in_current_min;
 	float l_abs_current_max;
+	bool use_max_watt_limit;
+	float watts_max;
 	float l_min_erpm;
 	float l_max_erpm;
 	float l_max_erpm_fbrake;
@@ -184,6 +193,7 @@ typedef struct {
 	float s_pid_ki;
 	float s_pid_kd;
 	float s_pid_min_erpm;
+	bool s_pid_breaking_enabled;
 	// Pos PID
 	float p_pid_kp;
 	float p_pid_ki;
@@ -225,7 +235,11 @@ typedef enum {
 	PPM_CTRL_TYPE_DUTY,
 	PPM_CTRL_TYPE_DUTY_NOREV,
 	PPM_CTRL_TYPE_PID,
-	PPM_CTRL_TYPE_PID_NOREV
+	PPM_CTRL_TYPE_PID_NOREV,
+	PPM_CTRL_TYPE_WATT_NOREV_BRAKE,
+	PPM_CTRL_TYPE_PID_NOACCELERATION,
+	PPM_CTRL_TYPE_CRUISE_CONTROL_SECONDARY_CHANNEL,
+	PPM_CTRL_TYPE_WATT
 } ppm_control_type;
 
 typedef struct {
@@ -241,6 +255,12 @@ typedef struct {
 	bool multi_esc;
 	bool tc;
 	float tc_max_diff;
+	float pulse_center;
+	float tc_offset;
+	ppm_cruise cruise_left;
+	ppm_cruise cruise_right;
+	bool max_erpm_for_dir_active;
+	float max_erpm_for_dir;
 } ppm_config;
 
 // ADC control types
@@ -279,7 +299,9 @@ typedef struct {
 typedef enum {
 	CHUK_CTRL_TYPE_NONE = 0,
 	CHUK_CTRL_TYPE_CURRENT,
-	CHUK_CTRL_TYPE_CURRENT_NOREV
+	CHUK_CTRL_TYPE_CURRENT_NOREV,
+	CHUK_CTRL_TYPE_WATT,
+	CHUK_CTRL_TYPE_WATT_NOREV
 } chuk_control_type;
 
 typedef struct {
@@ -293,6 +315,8 @@ typedef struct {
 	bool multi_esc;
 	bool tc;
 	float tc_max_diff;
+	float tc_offset;
+	bool buttons_mirrored;
 } chuk_config;
 
 // NRF Datatypes
@@ -352,6 +376,24 @@ typedef struct {
 } nrf_config;
 
 typedef struct {
+	bool adjustable_throttle_enabled;
+    float y1_throttle;
+    float y2_throttle;
+    float y3_throttle;
+    float x1_throttle;
+    float x2_throttle;
+    float x3_throttle;
+    float bezier_reduce_factor;
+    float y1_neg_throttle;
+    float y2_neg_throttle;
+    float y3_neg_throttle;
+    float x1_neg_throttle;
+    float x2_neg_throttle;
+    float x3_neg_throttle;
+    float bezier_neg_reduce_factor;
+} throttle_config;
+
+typedef struct {
 	// Settings
 	uint8_t controller_id;
 	uint32_t timeout_msec;
@@ -376,6 +418,8 @@ typedef struct {
 
 	// NRF application settings
 	nrf_config app_nrf_conf;
+	
+	throttle_config app_throttle_conf;
 } app_configuration;
 
 // Communication commands
@@ -415,7 +459,12 @@ typedef enum {
 	COMM_GET_DECODED_CHUK,
 	COMM_FORWARD_CAN,
 	COMM_SET_CHUCK_DATA,
-	COMM_CUSTOM_APP_DATA
+	COMM_CUSTOM_APP_DATA,
+	COMM_SET_SPEED_MODE,
+	COMM_CHANGE_SPEED_MODE,
+	COMM_GET_SPEED_MODE,
+	COMM_SET_CURRENT_CONF_AS_DEFAULT,
+	COMM_SET_MOTOR_TYPE
 } COMM_PACKET_ID;
 
 // CAN commands
@@ -429,7 +478,9 @@ typedef enum {
 	CAN_PACKET_FILL_RX_BUFFER_LONG,
 	CAN_PACKET_PROCESS_RX_BUFFER,
 	CAN_PACKET_PROCESS_SHORT_BUFFER,
-	CAN_PACKET_STATUS
+	CAN_PACKET_STATUS,
+	CAN_PACKET_SET_SERVO,
+	CAN_PACKET_SET_BRAKE_SERVO
 } CAN_PACKET_ID;
 
 // Logged fault data
@@ -476,7 +527,8 @@ typedef struct {
 	systime_t rx_time;
 	float rpm;
 	float current;
-	float duty;
+	int8_t duty;
+	ppm_cruise cruise_control_status;
 } can_status_msg;
 
 typedef struct {
@@ -504,20 +556,20 @@ typedef struct {
 	float temp_mos2;
 	float temp_mos3;
 	float temp_mos4;
-    float temp_mos5;
-    float temp_mos6;
-    float temp_pcb;
-    float current_motor;
-    float current_in;
-    float rpm;
-    float duty_now;
-    float amp_hours;
-    float amp_hours_charged;
-    float watt_hours;
-    float watt_hours_charged;
-    int tachometer;
-    int tachometer_abs;
-    mc_fault_code fault_code;
+	float temp_mos5;
+	float temp_mos6;
+	float temp_pcb;
+	float current_motor;
+	float current_in;
+	float rpm;
+	float duty_now;
+	float amp_hours;
+	float amp_hours_charged;
+	float watt_hours;
+	float watt_hours_charged;
+	int tachometer;
+	int tachometer_abs;
+	mc_fault_code fault_code;
 } mc_values;
 
 #endif /* DATATYPES_H_ */

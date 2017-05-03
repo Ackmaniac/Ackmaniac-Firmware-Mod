@@ -61,10 +61,10 @@
 #define MCCONF_L_BATTERY_CUT_END		8.0		// Limit the positive current completely at this voltage
 #endif
 #ifndef MCCONF_L_RPM_MAX
-#define MCCONF_L_RPM_MAX				100000.0	// The motor speed limit (Upper)
+#define MCCONF_L_RPM_MAX				60000.0	// The motor speed limit (Upper)
 #endif
 #ifndef MCCONF_L_RPM_MIN
-#define MCCONF_L_RPM_MIN				-100000.0	// The motor speed limit (Lower)
+#define MCCONF_L_RPM_MIN				-60000.0	// The motor speed limit (Lower)
 #endif
 #ifndef MCCONF_L_SLOW_ABS_OVERCURRENT
 #define MCCONF_L_SLOW_ABS_OVERCURRENT	true	// Use the filtered (and hence slower) current for the overcurrent fault detection
@@ -99,16 +99,19 @@
 
 // Speed PID parameters
 #ifndef MCCONF_S_PID_KP
-#define MCCONF_S_PID_KP					0.0001	// Proportional gain
+#define MCCONF_S_PID_KP					0.004	// Proportional gain
 #endif
 #ifndef MCCONF_S_PID_KI
-#define MCCONF_S_PID_KI					0.015	// Integral gain
+#define MCCONF_S_PID_KI					0.004	// Integral gain
 #endif
 #ifndef MCCONF_S_PID_KD
 #define MCCONF_S_PID_KD					0.0		// Derivative gain
 #endif
 #ifndef MCCONF_S_PID_MIN_RPM
 #define MCCONF_S_PID_MIN_RPM			900.0	// Minimum allowed RPM
+#endif
+#ifndef MCCONF_S_PID_BREAKING_ENABLED
+#define MCCONF_S_PID_BREAKING_ENABLED	true	// Break at PID speed mode (cruiso control)
 #endif
 
 // Position PID parameters
@@ -232,7 +235,7 @@
 #define MCCONF_FOC_MOTOR_FLUX_LINKAGE	0.00245
 #endif
 #ifndef MCCONF_FOC_OBSERVER_GAIN
-#define MCCONF_FOC_OBSERVER_GAIN		9e7		// Can be something like 600 / L
+#define MCCONF_FOC_OBSERVER_GAIN		9e7	// Can be something like 600 / L
 #endif
 #ifndef MCCONF_FOC_DUTY_DOWNRAMP_KP
 #define MCCONF_FOC_DUTY_DOWNRAMP_KP		10.0	// PI controller for duty control when decreasing the duty
@@ -244,10 +247,10 @@
 #define MCCONF_FOC_OPENLOOP_RPM			1200.0	// Openloop RPM (sensorless low speed or when finding index pulse)
 #endif
 #ifndef MCCONF_FOC_SL_OPENLOOP_HYST
-#define MCCONF_FOC_SL_OPENLOOP_HYST		0.5		// Time below min RPM to activate openloop (s)
+#define MCCONF_FOC_SL_OPENLOOP_HYST		0.5	// Time below min RPM to activate openloop (s)
 #endif
 #ifndef MCCONF_FOC_SL_OPENLOOP_TIME
-#define MCCONF_FOC_SL_OPENLOOP_TIME		0.5		// Time to remain in openloop (s)
+#define MCCONF_FOC_SL_OPENLOOP_TIME		0.5	// Time to remain in openloop (s)
 #endif
 #ifndef MCCONF_FOC_SL_D_CURRENT_DUTY
 #define MCCONF_FOC_SL_D_CURRENT_DUTY	0.0		// Inject d-axis current below this duty cycle in sensorless more
@@ -301,6 +304,12 @@
 #endif
 #ifndef MCCONF_M_SENSOR_PORT_MODE
 #define MCCONF_M_SENSOR_PORT_MODE		SENSOR_PORT_MODE_HALL // The mode of the hall_encoder port
+#endif
+#ifndef MCCONF_USE_MAX_WATT_LIMIT
+#define MCCONF_USE_MAX_WATT_LIMIT		false
+#endif
+#ifndef MCCONF_WATT_MAX
+#define MCCONF_WATT_MAX					1000.0	// Input current limit in Amperes (Upper)
 #endif
 
 #endif /* MCCONF_DEFAULT_H_ */

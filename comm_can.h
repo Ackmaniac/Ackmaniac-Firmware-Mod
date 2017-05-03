@@ -29,7 +29,7 @@
 
 // Settings
 #define CAN_STATUS_MSG_INT_MS		1
-#define CAN_STATUS_MSGS_TO_STORE	10
+#define CAN_STATUS_MSGS_TO_STORE	3
 
 // Functions
 void comm_can_init(void);
@@ -38,7 +38,9 @@ void comm_can_send_buffer(uint8_t controller_id, uint8_t *data, unsigned int len
 void comm_can_set_duty(uint8_t controller_id, float duty);
 void comm_can_set_current(uint8_t controller_id, float current);
 void comm_can_set_current_brake(uint8_t controller_id, float current);
-void comm_can_set_rpm(uint8_t controller_id, float rpm);
+void comm_can_set_servo(uint8_t controller_id, float servo_val, bool use_min_current);
+void comm_can_set_brake_servo(uint8_t controller_id, float servo_val);
+void comm_can_set_rpm(uint8_t controller_id, float rpm, ppm_cruise cruise_status);
 void comm_can_set_pos(uint8_t controller_id, float pos);
 can_status_msg *comm_can_get_status_msg_index(int index);
 can_status_msg *comm_can_get_status_msg_id(int id);
