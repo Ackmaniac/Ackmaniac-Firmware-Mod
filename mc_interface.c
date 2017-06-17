@@ -533,14 +533,14 @@ float mc_interface_get_duty_cycle_for_watt_calculation(void) {
 	float actual_duty;
 	
 	if (m_conf.motor_type == MOTOR_TYPE_FOC) {
-		float battery_current = mcpwm_foc_get_tot_current_in_filtered();
-		float motor_current = mcpwm_foc_get_tot_current_filtered();
+		//float battery_current = mcpwm_foc_get_tot_current_in_filtered();
+		//float motor_current = mcpwm_foc_get_tot_current_filtered();
 		
-		if (battery_current != 0.0 && motor_current != 0.0) {
-			actual_duty = fabsf(battery_current / motor_current);
-		} else {
+		//if (fabsf(battery_current) > 1.0 && fabsf(motor_current) > 1.0) {
+		//	actual_duty = fabsf(battery_current / motor_current);
+		//} else {
 			actual_duty = fabsf(mcpwm_foc_get_duty_cycle_now()) * 0.86602540378;
-		}
+		//}
 	} else {
 		actual_duty = fabsf(mc_interface_get_duty_cycle_now());
 	}
@@ -989,8 +989,13 @@ void mc_interface_fault_stop(mc_fault_code fault) {
 
 		fault_data fdata;
 		fdata.fault = fault;
-		fdata.current = mc_interface_get_tot_current();
-		fdata.current_filtered = mc_interface_get_tot_current_filtered();
+		if (m_conf.motor_type == MOTOR_TYPE_FOC) {
+			fdata.current = mcpwm_foc_get_abs_motor_current();
+			fdata.current_filtered = mcpwm_foc_get_abs_motor_current_filtered();
+		}else{
+			fdata.current = mc_interface_get_tot_current();
+			fdata.current_filtered = mc_interface_get_tot_current_filtered();
+		}
 		fdata.voltage = GET_INPUT_VOLTAGE();
 		fdata.duty = mc_interface_get_duty_cycle_now();
 		fdata.rpm = mc_interface_get_rpm();

@@ -605,7 +605,7 @@ void mcpwm_foc_set_brake_current(float current) {
 		return;
 	}
 
-	utils_truncate_number(&current, m_conf->lo_current_min, m_conf->lo_current_max);
+	utils_truncate_number(&current, m_conf->lo_current_min, fabsf(m_conf->lo_current_min));
 
 	m_control_mode = CONTROL_MODE_CURRENT_BRAKE;
 	m_iq_set = current;
@@ -1590,7 +1590,12 @@ void mcpwm_foc_adc_inj_int_handler(void) {
 		// Apply current limits
 		const float mod_q = m_motor_state.mod_q;
 		utils_truncate_number(&iq_set_tmp, m_conf->lo_current_min, m_conf->lo_current_max);
-		utils_saturate_vector_2d(&id_set_tmp, &iq_set_tmp, m_conf->lo_current_max);
+		if (iq_set_tmp < 0.0) {
+			utils_saturate_vector_2d(&id_set_tmp, &iq_set_tmp, m_conf->lo_current_min);
+		} else {
+
+			utils_saturate_vector_2d(&id_set_tmp, &iq_set_tmp, m_conf->lo_current_max);
+		}
 		if (mod_q > 0.001) {
 			utils_truncate_number(&iq_set_tmp, m_conf->lo_in_current_min / mod_q, m_conf->lo_in_current_max / mod_q);
 		} else if (mod_q < -0.001) {

@@ -1010,7 +1010,7 @@ void commands_process_packet(unsigned char *data, unsigned int len) {
 							if (max_erpm > 0 && max_erpm <= 100000.0) {
 								appconf.app_ppm_conf.pid_max_erpm = max_erpm;
 								appconf.app_ppm_conf.rpm_lim_end = max_erpm;
-								appconf.app_ppm_conf.rpm_lim_start = max_erpm - ((int16_t)(max_erpm / 12.5)); // 8% off
+								appconf.app_ppm_conf.rpm_lim_start = max_erpm - ((int16_t)(max_erpm / 10)); // 10% off
 							}
 						}
 					
@@ -1035,7 +1035,7 @@ void commands_process_packet(unsigned char *data, unsigned int len) {
 						
 							if (max_erpm > 0 && max_erpm <= 100000.0) {
 								appconf.app_chuk_conf.rpm_lim_end = max_erpm;
-								appconf.app_chuk_conf.rpm_lim_start = max_erpm - ((int16_t)(max_erpm / 12.5)); // 8% off
+								appconf.app_chuk_conf.rpm_lim_start = max_erpm - ((int16_t)(max_erpm / 10)); // 10% off
 							}
 													
 						}
